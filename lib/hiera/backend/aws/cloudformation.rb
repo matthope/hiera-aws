@@ -26,10 +26,16 @@ class Hiera
         private
 
         def lookup_cfn_output_value(stack_name, output_key)
-          found_stacks = @client.describe_stacks(:stack_name => stack_name)[:stacks]
-          found_stacks.first[:outputs].select do |output|
-            output.fetch(:output_key) == output_key
-          end.first.fetch(:output_value)
+          begin
+            found_stacks = @client.describe_stacks(:stack_name => stack_name)[:stacks]
+            found_stacks.first[:outputs].select do |output|
+              output.fetch(:output_key) == output_key
+            end.first.fetch(:output_value)
+          rescue AWS::CloudFormation::Errors::ValidationError => e
+            ""
+          rescue NoMethodError => e
+            ""
+          end
         end
       end
     end
